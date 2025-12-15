@@ -1,0 +1,11 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 2rem;
+  line-height: 1.6;
+  background: #fafafa;
+  color: #222;
+}
+
+main {
+  max-width: 720px;
+}
