@@ -13,9 +13,7 @@
       <nav aria-label="Primary">
         <ul class="nav-links">
           <li><a href="#home">Home</a></li>
-          <li><a href="#research">Research</a></li>
-          <li><a href="#feed">Feed</a></li>
-          <li><a href="#about">About</a></li>
+          <li><a href="#feeds">Feeds</a></li>
         </ul>
       </nav>
     </div>
@@ -23,68 +21,36 @@
 
   <main id="home">
     <section class="hero container">
-      <p class="eyebrow">Multi-valued research playground</p>
+      <p class="eyebrow">multi-state systems // live build</p>
       <h1>nStateLogic</h1>
-      <p class="hero-subheading" aria-label="Multi State Computing">
-        <span style="--i: 0">M</span>
-        <span style="--i: 1">U</span>
-        <span style="--i: 2">L</span>
-        <span style="--i: 3">T</span>
-        <span style="--i: 4">I</span>
-        <span class="gap" aria-hidden="true"></span>
-        <span style="--i: 5">S</span>
-        <span style="--i: 6">T</span>
-        <span style="--i: 7">A</span>
-        <span style="--i: 8">T</span>
-        <span style="--i: 9">E</span>
-        <span class="gap" aria-hidden="true"></span>
-        <span style="--i: 10">C</span>
-        <span style="--i: 11">O</span>
-        <span style="--i: 12">M</span>
-        <span style="--i: 13">P</span>
-        <span style="--i: 14">U</span>
-        <span style="--i: 15">T</span>
-        <span style="--i: 16">I</span>
-        <span style="--i: 17">N</span>
-        <span style="--i: 18">G</span>
-      </p>
-      <p class="lede">
-        Exploring multi-state logic, architectures, and the tools that make
-        non-binary computation practical.
-      </p>
-      <div class="actions">
-        <a class="button primary" href="#research">Read the research</a>
-        <a class="button ghost" href="#feed">View the feed</a>
+      <p class="lede">This site is an experimental research playground.</p>
+      <p class="tagline">signal locked • ready to deploy</p>
+    </section>
+
+    <section class="feeds container" id="feeds" aria-labelledby="feeds-title">
+      <div class="feeds-header">
+        <p class="eyebrow">collated feeds</p>
+        <h2 id="feeds-title">Research streams</h2>
+        <p class="lede">Incoming data, builds, and notes. These panels fill as new research is ingested.</p>
       </div>
-    </section>
-
-    <section class="panel container" id="research">
-      <p class="eyebrow">Research</p>
-      <h2>Systems beyond binary</h2>
-      <p>
-        Formal notes on algebraic structures, device models, and circuit-level behaviors
-        that enable robust multi-state computing. Expect proofs, diagrams, and failure
-        analyses rather than marketing gloss.
-      </p>
-    </section>
-
-    <section class="panel container" id="feed">
-      <p class="eyebrow">Feed</p>
-      <h2>Working log</h2>
-      <p>
-        Fast notes, experiments, and data drops from ongoing builds. Short dispatches
-        capture what is being measured, what broke, and what surprised us this week.
-      </p>
-    </section>
-
-    <section class="panel container" id="about">
-      <p class="eyebrow">About</p>
-      <h2>Why nStateLogic exists</h2>
-      <p>
-        A small, independent effort focused on making multi-valued logic tangible. The
-        project blends research and prototyping to understand where richer state spaces
-        can simplify hardware and software alike.
-      </p>
+      <div class="feed-grid" role="list">
+        <article class="feed-card" role="listitem">
+          <h3>Device models</h3>
+          <p>Recent circuit sims, switching thresholds, and failure logs.</p>
+        </article>
+        <article class="feed-card" role="listitem">
+          <h3>Logic experiments</h3>
+          <p>Truth tables, algebraic proofs, and non-binary gate behavior.</p>
+        </article>
+        <article class="feed-card" role="listitem">
+          <h3>Signal capture</h3>
+          <p>Scope traces, waveform snapshots, and noise characterizations.</p>
+        </article>
+        <article class="feed-card" role="listitem">
+          <h3>Field notes</h3>
+          <p>Build diary entries, toolchain updates, and deployment checks.</p>
+        </article>
+      </div>
     </section>
   </main>
 
