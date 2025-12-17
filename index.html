@@ -14,6 +14,7 @@
         <ul class="nav-links">
           <li><a href="#home">Home</a></li>
           <li><a href="#feeds">Feeds</a></li>
+          <li><a href="#chat">Chat</a></li>
         </ul>
       </nav>
     </div>
@@ -52,6 +53,27 @@
         </article>
       </div>
     </section>
+
+    <!-- Chat section -->
+    <section class="container" id="chat" aria-labelledby="chat-title">
+      <p class="eyebrow">experimental interface</p>
+      <h2 id="chat-title">Live chat</h2>
+      <p class="lede">
+        Public experimental chat with a model running on our AI server.
+        Prompts and responses are logged for research purposes.
+      </p>
+
+      <div id="chatlog"
+           style="white-space:pre-wrap; border:1px solid #444; padding:1rem; border-radius:8px; min-height:180px; margin-bottom:1rem;">
+      </div>
+
+      <form id="chatform">
+        <input id="msg" type="text"
+               placeholder="Type a message…"
+               style="width:100%; padding:0.75rem; margin-bottom:0.5rem;">
+        <button type="submit">Send</button>
+      </form>
+    </section>
   </main>
 
   <footer class="footer">
@@ -64,5 +86,36 @@
       <p class="micro">© 2024 nStateLogic</p>
     </div>
   </footer>
+
+  <script>
+    const log = document.getElementById('chatlog');
+    const form = document.getElementById('chatform');
+    const msg = document.getElementById('msg');
+
+    function append(who, text) {
+      log.textContent += `${who}: ${text}\n\n`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = msg.value.trim();
+      if (!text) return;
+      msg.value = '';
+      append('You', text);
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        append('Model', data.reply || '(no reply)');
+      } catch (err) {
+        append('Error', String(err));
+      }
+    });
+  </script>
 </body>
 </html>
