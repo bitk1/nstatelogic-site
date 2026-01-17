@@ -5,6 +5,11 @@
   <title>nStateLogic</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-FhCMClW+qI8qF9l6NhCyGy+dLdD8R4h6F9alRrKef57ULyXl2GOCSLHscmzP2ZiN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js" integrity="sha384-w1eukgqbpFsA2x9tudZFWgYvunVTNJlIhbi8RP3p5nfmi9GRU52lUawmivF7K8FJ" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" integrity="sha384-ft1aq0L3pxJ1e5V/BMHJR+I/fSdgMydXmHYjo+g/hJ3SY1AKw6dDWMeAxOvVhv8R" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" integrity="sha384-6zdUUL10F/Do3H1r7l5gfmwmMjFqnlI+G4rDeN5QxjJR+asZ7JsmE8qqaHHGQbRV" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQVyk/4YJeysyJJPgvs71b74mcZ1TnV2hMm/D1uk3f2SXIb5VQRNuH0Pp/V" crossorigin="anonymous" defer></script>
 </head>
 <body>
   <header class="top-bar">
@@ -34,9 +39,7 @@
         Please be patient, this chat runs on a low resource experimental server and responses may take a little while.
       </p>
 
-      <div id="chatlog"
-           style="white-space:pre-wrap; border:1px solid #444; padding:1rem; border-radius:8px; min-height:180px; margin-bottom:1rem;">
-      </div>
+      <div id="chatlog" class="chatlog" aria-live="polite" role="log"></div>
 
       <form id="chatform">
         <input id="msg" type="text"
@@ -85,33 +88,107 @@
   </footer>
 
   <script>
-    const log = document.getElementById('chatlog');
-    const form = document.getElementById('chatform');
-    const msg = document.getElementById('msg');
+    window.addEventListener('DOMContentLoaded', () => {
+      const log = document.getElementById('chatlog');
+      const form = document.getElementById('chatform');
+      const msg = document.getElementById('msg');
+      const md = window.markdownit ? window.markdownit({ html: false, breaks: true, linkify: true }) : null;
 
-    function append(who, text) {
-      log.textContent += `${who}: ${text}\n\n`;
-      log.scrollTop = log.scrollHeight;
-    }
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = msg.value.trim();
-      if (!text) return;
-      msg.value = '';
-      append('You', text);
-
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
-        });
-        const data = await res.json();
-        append('Model', data.reply || '(no reply)');
-      } catch (err) {
-        append('Error', String(err));
+      function renderMath(el) {
+        if (typeof window.renderMathInElement !== 'function') return false;
+        try {
+          window.renderMathInElement(el, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\[', right: '\\]', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (err) {
+          console.error('Math render error', err);
+        }
+        return true;
       }
+
+      function renderAssistantContent(text) {
+        const rawHtml = md ? md.render(text) : text;
+        const safeHtml = window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'msg-content';
+        wrapper.innerHTML = safeHtml;
+        if (!renderMath(wrapper)) {
+          wrapper.dataset.deferMath = 'true';
+        }
+        return wrapper;
+      }
+
+      function addMessage(role, text) {
+        const row = document.createElement('div');
+        row.className = `msg-row ${role}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+
+        const content = role === 'assistant'
+          ? renderAssistantContent(text)
+          : Object.assign(document.createElement('div'), { className: 'msg-content', textContent: text });
+
+        bubble.appendChild(content);
+        row.appendChild(bubble);
+        log.appendChild(row);
+        log.scrollTop = log.scrollHeight;
+        return row;
+      }
+
+      function showThinking() {
+        const row = document.createElement('div');
+        row.className = 'msg-row assistant';
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble thinking';
+        ['dot', 'dot', 'dot'].forEach((cls, idx) => {
+          const dot = document.createElement('span');
+          dot.className = `dot d${idx}`;
+          bubble.appendChild(dot);
+        });
+        row.appendChild(bubble);
+        log.appendChild(row);
+        log.scrollTop = log.scrollHeight;
+        return row;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = msg.value.trim();
+        if (!text) return;
+        msg.value = '';
+        addMessage('user', text);
+        const thinking = showThinking();
+
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+          });
+          const data = await res.json();
+          thinking.remove();
+          addMessage('assistant', data.reply || '(no reply)');
+        } catch (err) {
+          thinking.remove();
+          addMessage('assistant', 'Error: ' + String(err));
+        }
+      });
+
+      window.addEventListener('load', () => {
+        const pending = Array.from(document.querySelectorAll('[data-defer-math]'));
+        pending.forEach((el) => {
+          if (renderMath(el)) {
+            el.removeAttribute('data-defer-math');
+          }
+        });
+      });
     });
   </script>
 </body>
