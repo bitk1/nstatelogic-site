@@ -5,11 +5,11 @@
   <title>nStateLogic</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-FhCMClW+qI8qF9l6NhCyGy+dLdD8R4h6F9alRrKef57ULyXl2GOCSLHscmzP2ZiN" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js" integrity="sha384-w1eukgqbpFsA2x9tudZFWgYvunVTNJlIhbi8RP3p5nfmi9GRU52lUawmivF7K8FJ" crossorigin="anonymous" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" integrity="sha384-ft1aq0L3pxJ1e5V/BMHJR+I/fSdgMydXmHYjo+g/hJ3SY1AKw6dDWMeAxOvVhv8R" crossorigin="anonymous" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" integrity="sha384-6zdUUL10F/Do3H1r7l5gfmwmMjFqnlI+G4rDeN5QxjJR+asZ7JsmE8qqaHHGQbRV" crossorigin="anonymous" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQVyk/4YJeysyJJPgvs71b74mcZ1TnV2hMm/D1uk3f2SXIb5VQRNuH0Pp/V" crossorigin="anonymous" defer></script>
+  <link rel="stylesheet" href="/vendor/katex/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
+  <script defer src="/vendor/katex/katex.min.js"></script>
+  <script defer src="/vendor/katex/auto-render.min.js"></script>
 </head>
 <body>
   <header class="top-bar">
@@ -112,6 +112,10 @@
         return true;
       }
 
+      function renderMathEverywhere() {
+        renderMath(log);
+      }
+
       function renderAssistantContent(text) {
         const rawHtml = md ? md.render(text) : text;
         const safeHtml = window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
@@ -139,6 +143,9 @@
         row.appendChild(bubble);
         log.appendChild(row);
         log.scrollTop = log.scrollHeight;
+        if (role === 'assistant') {
+          renderMathEverywhere();
+        }
         return row;
       }
 
@@ -182,12 +189,7 @@
       });
 
       window.addEventListener('load', () => {
-        const pending = Array.from(document.querySelectorAll('[data-defer-math]'));
-        pending.forEach((el) => {
-          if (renderMath(el)) {
-            el.removeAttribute('data-defer-math');
-          }
-        });
+        renderMathEverywhere();
       });
     });
   </script>
