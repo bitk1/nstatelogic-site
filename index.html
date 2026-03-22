@@ -2,220 +2,801 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>MakeSpace Trial Chatbot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="/vendor/katex/katex.min.css">
-  <script defer src="/vendor/markdown-it/markdown-it.min.js"></script>
-  <script defer src="/vendor/dompurify/purify.min.js"></script>
-  <script defer src="/vendor/katex/katex.min.js"></script>
-  <script defer src="/vendor/katex/auto-render.min.js"></script>
+  <title>Multi-State Computing: Beyond Binary</title>
+  <meta
+    name="description"
+    content="A concise overview of the current state of non-binary computing, from ternary logic and memristors to qudits and probabilistic hardware."
+  >
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f1ea;
+      --bg-elevated: rgba(255, 252, 247, 0.88);
+      --surface: #fbf8f3;
+      --surface-strong: #fffdf9;
+      --surface-muted: #f1ece2;
+      --text: #1e2523;
+      --muted: #57615d;
+      --heading: #161c1a;
+      --line: rgba(31, 39, 37, 0.12);
+      --line-strong: rgba(31, 39, 37, 0.2);
+      --accent: #235245;
+      --accent-soft: rgba(35, 82, 69, 0.08);
+      --accent-soft-strong: rgba(35, 82, 69, 0.14);
+      --shadow: 0 20px 50px rgba(21, 29, 26, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --content: 72rem;
+      --reading: 42rem;
+      --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--serif);
+      line-height: 1.65;
+      background:
+        radial-gradient(circle at top left, rgba(122, 151, 143, 0.14), transparent 30%),
+        radial-gradient(circle at top right, rgba(199, 186, 164, 0.16), transparent 24%),
+        linear-gradient(180deg, #f8f5ef 0%, #f4f1ea 54%, #eee8de 100%);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.16em;
+      transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: #13352c;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    :focus-visible {
+      outline: 2px solid rgba(35, 82, 69, 0.5);
+      outline-offset: 3px;
+    }
+
+    .shell {
+      width: min(var(--content), calc(100vw - 2rem));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(248, 245, 239, 0.84);
+      border-bottom: 1px solid rgba(31, 39, 37, 0.08);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      color: var(--heading);
+      text-decoration: none;
+      font-family: var(--sans);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.55);
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+
+    .brand-text {
+      display: grid;
+      gap: 0.08rem;
+    }
+
+    .brand-text strong {
+      font-size: 0.95rem;
+    }
+
+    .brand-text span {
+      color: var(--muted);
+      font-size: 0.77rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.45rem;
+    }
+
+    .nav a {
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+      color: var(--muted);
+      text-decoration: none;
+      font-family: var(--sans);
+      font-size: 0.93rem;
+      font-weight: 600;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible,
+    .nav a.is-active {
+      color: var(--heading);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    main {
+      padding: 2rem 0 4rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.95fr);
+      gap: 1.5rem;
+      padding: clamp(1.5rem, 2.5vw, 2.5rem);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 253, 249, 0.92), rgba(250, 246, 240, 0.86));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow,
+    .section-kicker {
+      margin: 0 0 0.75rem;
+      color: var(--accent);
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--heading);
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    h1 {
+      max-width: 10ch;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.55rem);
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      font-size: 1.28rem;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      margin: 1.15rem 0 0;
+      max-width: 32rem;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .intro {
+      margin-top: 1.5rem;
+      max-width: var(--reading);
+      font-size: 1.03rem;
+    }
+
+    .hero-notes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 1.5rem;
+    }
+
+    .note-pill {
+      padding: 0.55rem 0.82rem;
+      border-radius: 999px;
+      border: 1px solid rgba(35, 82, 69, 0.12);
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+    }
+
+    .diagram {
+      align-self: stretch;
+      display: grid;
+      gap: 1rem;
+      padding: 1.25rem;
+      border-radius: calc(var(--radius-lg) - 8px);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(242, 237, 228, 0.88));
+    }
+
+    .diagram-title {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .diagram-row {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .diagram-row strong {
+      font-family: var(--sans);
+      font-size: 0.93rem;
+      color: var(--heading);
+    }
+
+    .states {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      min-height: 3rem;
+    }
+
+    .state {
+      position: relative;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(35, 82, 69, 0.16);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .state::after {
+      content: attr(data-label);
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .state.faint {
+      background: linear-gradient(180deg, #fcfbf8, #f2ede3);
+    }
+
+    .state.mid {
+      background: linear-gradient(180deg, #eef4f1, #dce8e2);
+    }
+
+    .state.deep {
+      background: linear-gradient(180deg, #d6e4de, #b9cfc7);
+    }
+
+    .state.wide {
+      width: 2.35rem;
+      height: 2.35rem;
+    }
+
+    .section {
+      margin-top: 1.25rem;
+      padding: clamp(1.4rem, 2vw, 2rem);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--bg-elevated);
+      box-shadow: 0 12px 30px rgba(21, 29, 26, 0.04);
+    }
+
+    .section.alt {
+      background: linear-gradient(180deg, rgba(251, 248, 243, 0.96), rgba(244, 239, 232, 0.92));
+    }
+
+    .section-head {
+      display: grid;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-head p,
+    .section-body > p,
+    .closing p {
+      max-width: var(--reading);
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .section-body {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .insight-panel {
+      padding: 1.1rem 1.15rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .insight-panel h3 {
+      margin-bottom: 0.7rem;
+    }
+
+    .insight-panel p,
+    .insight-panel li {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .insight-panel ul {
+      margin: 0;
+      padding-left: 1.15rem;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 0.85rem;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      max-width: 36rem;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 1.15rem;
+      color: var(--muted);
+    }
+
+    .bullet-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.74rem;
+      width: 0.42rem;
+      height: 0.42rem;
+      border-radius: 999px;
+      background: rgba(35, 82, 69, 0.54);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      padding: 1.2rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 243, 236, 0.74));
+    }
+
+    .card p {
+      margin: 0.65rem 0 0;
+      color: var(--muted);
+    }
+
+    .resource-note {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+    }
+
+    .resources {
+      display: grid;
+      gap: 0.85rem;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .resources li {
+      padding: 1rem 1.05rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .resources a {
+      display: inline-block;
+      color: var(--heading);
+      font-family: var(--sans);
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    .resources a:hover,
+    .resources a:focus-visible {
+      color: var(--accent);
+      border-color: rgba(35, 82, 69, 0.4);
+    }
+
+    .resources p {
+      margin: 0.42rem 0 0;
+      color: var(--muted);
+    }
+
+    .closing {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .closing-panel {
+      padding: 1.2rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(35, 82, 69, 0.16);
+      background: linear-gradient(180deg, rgba(227, 237, 233, 0.65), rgba(255, 255, 255, 0.62));
+    }
+
+    footer {
+      padding: 0 0 2.5rem;
+    }
+
+    .footer-panel {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0 0;
+      border-top: 1px solid rgba(31, 39, 37, 0.12);
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.92rem;
+    }
+
+    .footer-panel p {
+      margin: 0;
+      max-width: 40rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .two-column,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-inner,
+      .footer-panel {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        font-size: 0.98rem;
+      }
+
+      .shell {
+        width: min(var(--content), calc(100vw - 1.2rem));
+      }
+
+      .topbar-inner {
+        padding: 0.8rem 0;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .nav a {
+        padding-inline: 0.68rem;
+      }
+
+      main {
+        padding-top: 1.1rem;
+      }
+
+      .diagram-row {
+        grid-template-columns: 1fr;
+      }
+
+      .section,
+      .hero {
+        border-radius: 22px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <header class="top-bar">
-    <div class="container nav">
-      <a class="brand" href="#home">
-        <span class="brand-mark" aria-hidden="true">MS</span>
-        <span class="brand-text">MakeSpace Trial Chatbot</span>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">NS</span>
+        <span class="brand-text">
+          <strong>nstatelogic.com</strong>
+          <span>Research overview</span>
+        </span>
       </a>
-      <nav aria-label="Primary">
-        <ul class="nav-links">
-          <li><a href="#home">Overview</a></li>
-          <li><a href="#chat">Chat</a></li>
-          <li><a href="#sources">Sources</a></li>
-        </ul>
+      <nav class="nav" aria-label="Section navigation">
+        <a href="#state-of-field">Current state</a>
+        <a href="#why-it-matters">Why it matters</a>
+        <a href="#research-areas">Research areas</a>
+        <a href="#resources">Resources</a>
+        <a href="#bottom-line">Bottom line</a>
       </nav>
     </div>
   </header>
 
-  <main id="home">
-    <div class="container page-grid">
-      <div class="main-column">
-        <section class="hero" aria-labelledby="page-title">
-          <p class="eyebrow">Community workshop trial</p>
-          <h1 id="page-title">Ask practical MakeSpace questions in one place.</h1>
+  <main id="top">
+    <div class="shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Multi-valued logic research brief</p>
+          <h1 id="page-title">Multi-State Computing: Beyond Binary</h1>
           <p class="subtitle">
-            This is a trial chatbot intended to help people find their way around MakeSpace information in a simple,
-            welcoming format. The chat remains the main tool, with a clearer frame around what it is and how to use it.
+            A concise overview of the current state of non-binary computing, from ternary logic and memristors to qudits and probabilistic hardware.
           </p>
-          <div class="hero-meta" aria-label="Key notes">
-            <span class="meta-pill">Derived from public MakeSpace material</span>
-            <span class="meta-pill">Experimental and may be slow</span>
-            <span class="meta-pill">Check official sources for important details</span>
+          <p class="intro">
+            Most modern computers are built on binary logic: 0 and 1. But computing does not have to stop there. Researchers have long explored systems that use three or more stable states, often called multi-state, multi-valued, or non-binary computing. Today, the field is active again, driven by new materials, new device physics, logic-in-memory designs, and renewed interest in architectures that can represent more information per element than a conventional bit.
+          </p>
+          <div class="hero-notes" aria-label="Key points">
+            <span class="note-pill">Research direction, not a mainstream replacement</span>
+            <span class="note-pill">Strongest momentum in memory-centric and specialized hardware</span>
+            <span class="note-pill">Serious technical hurdles remain</span>
           </div>
-        </section>
+        </div>
 
-        <section class="chat-wrap" id="chat" aria-labelledby="chat-title">
-          <div class="chat-panel">
-            <div class="chat-header">
-              <div>
-                <h2 id="chat-title">Try the chatbot</h2>
-                <p class="lede">
-                  Ask about membership, training, workshop processes, or rules. Replies are generated from a public-material
-                  trial system, so they should be treated as guidance rather than as the final word.
-                </p>
-              </div>
-              <div class="chat-note">MakeSpace public-material trial</div>
+        <aside class="diagram" aria-label="Abstract comparison of binary, ternary, and multi-state systems">
+          <p class="diagram-title">State-space sketch</p>
+          <div class="diagram-row">
+            <strong>Binary</strong>
+            <div class="states" aria-hidden="true">
+              <span class="state faint" data-label="0"></span>
+              <span class="state deep" data-label="1"></span>
             </div>
-
-            <div id="chatlog" class="chatlog" aria-live="polite" role="log"></div>
-
-            <form id="chatform">
-              <input id="msg" type="text" placeholder="Type a message...">
-              <button type="submit">Send</button>
-            </form>
           </div>
-        </section>
-      </div>
+          <div class="diagram-row">
+            <strong>Ternary</strong>
+            <div class="states" aria-hidden="true">
+              <span class="state faint" data-label="-"></span>
+              <span class="state mid" data-label="0"></span>
+              <span class="state deep" data-label="+"></span>
+            </div>
+          </div>
+          <div class="diagram-row">
+            <strong>Multi-state</strong>
+            <div class="states" aria-hidden="true">
+              <span class="state faint wide" data-label="s1"></span>
+              <span class="state mid wide" data-label="s2"></span>
+              <span class="state deep wide" data-label="s3"></span>
+              <span class="state mid wide" data-label="s4"></span>
+              <span class="state faint wide" data-label="s5"></span>
+            </div>
+          </div>
+        </aside>
+      </section>
 
-      <aside class="sidebar">
-        <section class="info-card" id="sources" aria-labelledby="sources-title">
-          <h2 id="sources-title">Source material</h2>
-          <p>
-            This trial chatbot is derived from public MakeSpace material, including training materials, the membership agreement,
-            and the published rules.
-          </p>
-          <ul>
-            <li><a href="https://equipment.makespace.org/" target="_blank" rel="noreferrer">Training materials</a></li>
-            <li><a href="https://web.makespace.org/agreement/" target="_blank" rel="noreferrer">Membership agreement</a></li>
-            <li><a href="https://web.makespace.org/rules/" target="_blank" rel="noreferrer">Rules</a></li>
+      <section class="section" id="state-of-field" aria-labelledby="state-title">
+        <div class="section-head">
+          <p class="section-kicker">Current state of the field</p>
+          <h2 id="state-title">Promising, active, and still far from standard practice</h2>
+        </div>
+        <div class="section-body two-column">
+          <div>
+            <p>
+              Multi-state computing is best understood as a promising research direction rather than an established replacement for mainstream binary processors. The most mature and widely discussed branch is ternary logic, especially radix-3 systems, because ternary is often treated as a practical compromise between increased information density and manageable circuit complexity.
+            </p>
+            <p>
+              Recent work includes device-level demonstrations of binary and ternary logic-in-memory, reconfigurable binary/ternary conversion-in-memory, transistor designs that expose an intermediate logic state, memristor-based multi-valued logic, and higher-dimensional quantum computing using qudits. These developments suggest that non-binary logic may be most useful first in specialized or memory-centric systems rather than as a direct drop-in replacement for general-purpose CPUs.
+            </p>
+            <p>
+              At the same time, there are still major obstacles: fabrication complexity, signal integrity, noise margins, device variability, software tooling, and the lack of a mature ecosystem comparable to binary CMOS computing.
+            </p>
+          </div>
+          <aside class="insight-panel" aria-labelledby="snapshot-title">
+            <h3 id="snapshot-title">Field snapshot</h3>
+            <ul>
+              <li>Ternary logic remains the clearest practical reference point.</li>
+              <li>Logic-in-memory and emerging devices are driving much of the recent momentum.</li>
+              <li>Near-term relevance appears strongest in specialized accelerators and experimental platforms.</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section alt" id="why-it-matters" aria-labelledby="why-title">
+        <div class="section-head">
+          <p class="section-kicker">Why it matters</p>
+          <h2 id="why-title">Why researchers keep returning to non-binary architectures</h2>
+        </div>
+        <div class="section-body">
+          <ul class="bullet-list">
+            <li>More information per symbol.</li>
+            <li>Potential reductions in interconnect and wiring overhead.</li>
+            <li>Possible efficiency gains in some arithmetic and memory operations.</li>
+            <li>A good fit with emerging devices that naturally support intermediate or multiple stable states.</li>
+            <li>Relevance to AI accelerators, in-memory computing, optimization hardware, and quantum-adjacent architectures.</li>
           </ul>
-        </section>
+        </div>
+      </section>
 
-        <section class="info-card warning-card" aria-labelledby="warning-title">
-          <h2 id="warning-title">Experimental warning</h2>
-          <p>
-            This chatbot is experimental. It may be slow, it may stop working, and it may make mistakes.
-          </p>
-          <p>
-            Please verify anything important against the official MakeSpace sources before relying on it.
-          </p>
-        </section>
+      <section class="section" id="research-areas" aria-labelledby="areas-title">
+        <div class="section-head">
+          <p class="section-kicker">Main research areas</p>
+          <h2 id="areas-title">Five fronts where multi-state computing is advancing</h2>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <h3>Ternary and multi-valued logic circuits</h3>
+            <p>CMOS, CNTFET, organic, and transistor-level designs for arithmetic, memory, and control logic.</p>
+          </article>
+          <article class="card">
+            <h3>Logic-in-memory and memristors</h3>
+            <p>Architectures that combine storage and computation, often making multi-state representations more natural than in standard CMOS pipelines.</p>
+          </article>
+          <article class="card">
+            <h3>Spintronics and emerging devices</h3>
+            <p>Research using magnetic tunnel junctions and other non-CMOS technologies for ternary logic and logic-in-memory.</p>
+          </article>
+          <article class="card">
+            <h3>Qudit quantum computing</h3>
+            <p>Higher-dimensional quantum information processing, along with compilers, simulators, and mixed-dimensional toolchains.</p>
+          </article>
+          <article class="card">
+            <h3>Probabilistic and physics-based computing</h3>
+            <p>Multi-level probabilistic hardware aimed especially at difficult optimization problems.</p>
+          </article>
+        </div>
+      </section>
 
-        <section class="info-card" aria-labelledby="use-title">
-          <h3 id="use-title">Best use</h3>
+      <section class="section alt" id="resources" aria-labelledby="resources-title">
+        <div class="section-head">
+          <p class="section-kicker">Suggested papers and resources</p>
+          <h2 id="resources-title">Selected recent pointers</h2>
+          <p>Selected pointers, not an exhaustive bibliography.</p>
+        </div>
+        <ul class="resources">
+          <li>
+            <a href="https://doi.org/10.1016/j.rineng.2024.102761" target="_blank" rel="noopener noreferrer">Design implementations of ternary logic systems: A critical review (2024)</a>
+            <p>A broad review of ternary logic implementations, comparing design approaches, device technologies, and open practical constraints.</p>
+          </li>
+          <li>
+            <a href="https://www.nature.com/articles/s41598-024-57290-w" target="_blank" rel="noopener noreferrer">Binary and ternary logic-in-memory using nanosheet feedback field-effect transistors (2024)</a>
+            <p>Device-level work showing binary and ternary logic-in-memory using nanosheet feedback FET structures.</p>
+          </li>
+          <li>
+            <a href="https://www.nature.com/articles/s41467-023-39394-5" target="_blank" rel="noopener noreferrer">A reconfigurable binary/ternary logic conversion-in-memory (2023)</a>
+            <p>A reconfigurable conversion-in-memory design that moves between binary and ternary logic within the memory fabric.</p>
+          </li>
+          <li>
+            <a href="https://www.nature.com/articles/s41467-025-62116-y" target="_blank" rel="noopener noreferrer">Reconfigurable binary and ternary logic devices enabling logic applications (2025)</a>
+            <p>Reports transistor-level logic devices with controllable intermediate states, aimed at flexible binary and ternary operation.</p>
+          </li>
+          <li>
+            <a href="https://doi.org/10.1016/j.rineng.2025.104011" target="_blank" rel="noopener noreferrer">Ternary computing using a novel spintronic multi-operator logic-in-memory design (2025)</a>
+            <p>Explores a spintronic logic-in-memory architecture for ternary computing and its implications for compact logic operations.</p>
+          </li>
+          <li>
+            <a href="https://arxiv.org/abs/2410.02854" target="_blank" rel="noopener noreferrer">MQT Qudits: A Software Framework for Mixed-Dimensional Quantum Computing (2024)</a>
+            <p>A software-oriented framework for simulating, compiling, and experimenting with qudit and mixed-dimensional quantum workflows.</p>
+          </li>
+          <li>
+            <a href="https://journals.aps.org/pra/abstract/10.1103/PhysRevA.109.022615" target="_blank" rel="noopener noreferrer">Universal quantum computing with qubits embedded in trapped-ion qudits (2024)</a>
+            <p>Demonstrates how higher-dimensional trapped-ion systems can support universal quantum computing with embedded qubit structure.</p>
+          </li>
+          <li>
+            <a href="https://www.nature.com/articles/s41598-025-14531-w" target="_blank" rel="noopener noreferrer">Multi-level probabilistic computing: application to the multiway number partitioning problems (2025)</a>
+            <p>Connects multi-level probabilistic hardware to optimization problems, extending binary probabilistic ideas toward multiway partitioning.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="bottom-line" aria-labelledby="bottom-title">
+        <div class="section-head">
+          <p class="section-kicker">Bottom line</p>
+          <h2 id="bottom-title">A serious field with near-term value in specialized systems</h2>
+        </div>
+        <div class="closing">
           <p>
-            It is most useful for quick orientation and summarising public workshop information before you check the original pages.
+            Multi-state computing is no longer just a historical curiosity, but it is not yet a mainstream computing paradigm either. The field is advancing through specialized hardware research, especially where device physics makes multiple states natural and useful.
           </p>
-        </section>
-      </aside>
+          <div class="closing-panel">
+            <p>
+              The likely near-term future is not a universal replacement for binary laptops and servers, but a growing set of niche and high-performance applications in memory-centric systems, AI accelerators, optimization hardware, and quantum-adjacent computing.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container footer-panel">
-      <div class="footer-links">
-        <a href="#sources">Sources</a>
-        <a href="https://web.makespace.org/agreement/" target="_blank" rel="noreferrer">Agreement</a>
-        <a href="https://web.makespace.org/rules/" target="_blank" rel="noreferrer">Rules</a>
-      </div>
-      <p class="micro">MakeSpace trial chatbot interface</p>
+  <footer>
+    <div class="shell footer-panel">
+      <p>This page is a high-level overview intended as a temporary research summary for nstatelogic.com.</p>
+      <p>The field is evolving quickly, and specific devices, toolchains, and conclusions may change as the literature develops.</p>
     </div>
   </footer>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const log = document.getElementById('chatlog');
-      const form = document.getElementById('chatform');
-      const msg = document.getElementById('msg');
-      const md = window.markdownit ? window.markdownit({ html: false, breaks: true, linkify: true }) : null;
+    window.addEventListener("DOMContentLoaded", function () {
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav a"));
+      var sections = navLinks
+        .map(function (link) {
+          var id = link.getAttribute("href");
+          return document.querySelector(id);
+        })
+        .filter(Boolean);
 
-      function renderMath(el) {
-        if (typeof window.renderMathInElement !== 'function') return false;
-        try {
-          window.renderMathInElement(el, {
-            delimiters: [
-              { left: '$$', right: '$$', display: true },
-              { left: '\\[', right: '\\]', display: true },
-              { left: '$', right: '$', display: false },
-              { left: '\\(', right: '\\)', display: false }
-            ],
-            throwOnError: false
+      if (!("IntersectionObserver" in window) || !sections.length) {
+        return;
+      }
+
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) {
+              return;
+            }
+
+            navLinks.forEach(function (link) {
+              link.classList.toggle("is-active", link.getAttribute("href") === "#" + entry.target.id);
+            });
           });
-        } catch (err) {
-          console.error('Math render error', err);
+        },
+        {
+          rootMargin: "-35% 0px -50% 0px",
+          threshold: 0.1
         }
-        return true;
-      }
+      );
 
-      function renderMathEverywhere() {
-        renderMath(log);
-      }
-
-      function renderAssistantContent(text) {
-        const rawHtml = md ? md.render(text) : text;
-        const safeHtml = window.DOMPurify ? window.DOMPurify.sanitize(rawHtml) : rawHtml;
-        const wrapper = document.createElement('div');
-        wrapper.className = 'msg-content';
-        wrapper.innerHTML = safeHtml;
-        if (!renderMath(wrapper)) {
-          wrapper.dataset.deferMath = 'true';
-        }
-        return wrapper;
-      }
-
-      function addMessage(role, text) {
-        const row = document.createElement('div');
-        row.className = `msg-row ${role}`;
-
-        const bubble = document.createElement('div');
-        bubble.className = 'msg-bubble';
-
-        const content = role === 'assistant'
-          ? renderAssistantContent(text)
-          : Object.assign(document.createElement('div'), { className: 'msg-content', textContent: text });
-
-        bubble.appendChild(content);
-        row.appendChild(bubble);
-        log.appendChild(row);
-        log.scrollTop = log.scrollHeight;
-        if (role === 'assistant') {
-          renderMathEverywhere();
-        }
-        return row;
-      }
-
-      function showThinking() {
-        const row = document.createElement('div');
-        row.className = 'msg-row assistant';
-        const bubble = document.createElement('div');
-        bubble.className = 'msg-bubble thinking';
-        ['dot', 'dot', 'dot'].forEach((cls, idx) => {
-          const dot = document.createElement('span');
-          dot.className = `dot d${idx}`;
-          bubble.appendChild(dot);
-        });
-        row.appendChild(bubble);
-        log.appendChild(row);
-        log.scrollTop = log.scrollHeight;
-        return row;
-      }
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const text = msg.value.trim();
-        if (!text) return;
-        msg.value = '';
-        addMessage('user', text);
-        const thinking = showThinking();
-
-        try {
-          const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
-          });
-          const data = await res.json();
-          thinking.remove();
-          addMessage('assistant', data.reply || '(no reply)');
-        } catch (err) {
-          thinking.remove();
-          addMessage('assistant', 'Error: ' + String(err));
-        }
-      });
-
-      window.addEventListener('load', () => {
-        renderMathEverywhere();
+      sections.forEach(function (section) {
+        observer.observe(section);
       });
     });
   </script>
